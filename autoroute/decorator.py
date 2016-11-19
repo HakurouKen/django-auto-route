@@ -23,6 +23,6 @@ def route(url=None,name=None):
         @wraps(func)
         def wrapper(*args,**kwargs):
             return func(*args,**kwargs)
-        wrapper._route = UrlConf(url,name)
+        wrapper._urlconf = UrlConf(url,name)
         return wrapper
     return resolver
