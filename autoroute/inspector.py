@@ -150,4 +150,9 @@ class RouteInspector(object):
             return viewsloader(views,depth)
 
     def run(self):
-        pass
+        apps = [ item for item in os.listdir(self.root) if item in settings.INSTALLED_APPS ]
+        return reduce(
+            lambda urlpatterns,patterns: urlpatterns+patterns,
+            apps,
+            []
+        )
