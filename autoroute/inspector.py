@@ -35,9 +35,9 @@ class RouteInspector(object):
     STYLES = ('dash','underscore','camel',)
 
     def __init__(self,root=None,style='dash'):
-        root = root or getattr(settings,'PROJECT_ROOT',None)
+        root = root or getattr(settings,'BASE_DIR',None)
         if not root:
-            raise ParamsError('PROJECT_ROOT is undefined.')
+            raise ParamsError('BASE_DIR is undefined.')
         if style not in self.STYLES:
             raise ParamsError('Invalid style. Must chosen from %s' % self.STYLES)
         self.root = root
@@ -48,6 +48,7 @@ class RouteInspector(object):
             Normalize the function name based on given style.
             Function will assumed the given name a python-style (lower_case_with_underscores)
         '''
+        name = name.lower()
         if self.style == 'underscore':
             return name
         components = name.split('_')
@@ -108,7 +109,6 @@ class RouteInspector(object):
             # index function will bind an extra route.
             if name == 'index':
                 urlpatterns.append(url(r'/',func))
-
         return True,[
             url(r'^' + base, include(urlpatterns))
         ] if len(urlpatterns) else []
