@@ -27,6 +27,9 @@ def path_to_dotted(filepath):
     ''' Convert a python-filepath to a dotted module path. '''
     return '.'.join(re.sub(r'\.py$','',filepath).split(path.sep))
 
+PACKAGE_REGEX = re.compile(r'^[a-zA-Z][_a-zA-Z0-9]+$')
+def is_python_package(filename):
+    return PACKAGE_REGEX.match(filename)
 
 class RouteInspector(object):
     STYLES = ('dash','underscore','camel',)
@@ -139,7 +142,10 @@ class RouteInspector(object):
             viewnames = [
                 ''.join(filename.rsplit('.py',1))
                 for filename in files
+                    if filename.endswith('.py')
             ]
+            # filter all invalid names.
+            viewnames = filter(is_python_package,viewnames)
             # Make a dotted package name.
             views += [
                 '.'.join(path.join(root,viewname).split(path.sep))
