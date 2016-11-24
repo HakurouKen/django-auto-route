@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from os import path
 import inspect
 import re
 import sys
@@ -24,7 +25,7 @@ def reraise(err_type,err_value,err_traceback):
 
 def path_to_dotted(filepath):
     ''' Convert a python-filepath to a dotted module path. '''
-    return '.'.join(re.sub(r'\.py$','',filepath).split(os.path.sep))
+    return '.'.join(re.sub(r'\.py$','',filepath).split(path.sep))
 
 
 class RouteInspector(object):
@@ -68,7 +69,7 @@ class RouteInspector(object):
             # so that the exception here will be ignored silently(404),
             # rather than affect the global system.
             return True, []
-        base = '/'.join(route[depth:-1])
+        base = '/'.join(route[truncate:-1])
         base = base + '/' if base else ''
         view_name = route[-1]
 
@@ -108,13 +109,13 @@ class RouteInspector(object):
             url(r'^' + base, include(urlpatterns))
         ]
 
-    def viewsloader(views=None,truncate=0):
+    def viewsloader(self,views=None,truncate=0):
         ''' A batch operation of view loader, return compiled urlpatterns. '''
         views = views or []
         urlpatterns = []
         errors = []
         for view in views:
-            success, patterns = viewloader(view,depth)
+            success, patterns = self.viewloader(view,truncate)
             if success:
                 urlpatterns += patterns
             else:
@@ -124,16 +125,16 @@ class RouteInspector(object):
         urlpatterns += errors
         return urlpatterns
 
-    def apploader(app,excludes=None,truncate=0):
+    def apploader(self,app,excludes=None,truncate=0):
         ''' Load all views in a single app. '''
         excludes = excludes or []
         views = []
 
-        for root,dirs,files in os.walk(path.join(PROJECT_ROOT,app)):
+        for root,dirs,files in os.walk(path.join(self.root,app)):
             # ignore folder which is not a vaild python-package.
             if '__init__.py' not in files:
                 pass
-            root = path.relpath(root,PROJECT_ROOT)
+            root = path.relpath(root,self.root)
             # Import all .py files.
             viewnames = [
                 ''.join(filename.rsplit('.py',1))
@@ -147,12 +148,12 @@ class RouteInspector(object):
 
             # Filter all package in excludes.
             views = filter(lambda view: view not in excludes, views)
-            return viewsloader(views,depth)
+            return self.viewsloader(views,truncate)
 
     def run(self):
         apps = [ item for item in os.listdir(self.root) if item in settings.INSTALLED_APPS ]
         return reduce(
-            lambda urlpatterns,patterns: urlpatterns+patterns,
+            lambda urlpatterns,app: urlpatterns + self.apploader(app),
             apps,
             []
         )
