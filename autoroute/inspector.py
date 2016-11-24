@@ -108,9 +108,10 @@ class RouteInspector(object):
             # index function will bind an extra route.
             if name == 'index':
                 urlpatterns.append(url(r'/',func))
+
         return True,[
             url(r'^' + base, include(urlpatterns))
-        ]
+        ] if len(urlpatterns) else []
 
     def viewsloader(self,views=None,truncate=0):
         ''' A batch operation of view loader, return compiled urlpatterns. '''
