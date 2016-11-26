@@ -91,12 +91,12 @@ class RouteInspector(object):
 
         for func in funcs:
             # Only support view function here.
-            urlconf = getattr(func,'_urlconf',None)
+            urlconf = getattr(func,'_auto_urlconf',None)
             if not callable(func) or not isinstance(urlconf,UrlConf):
                 continue
             # If url is specified, resolve directly.
             if urlconf.url:
-                urlpatterns.append(url(urlconf.url,func,urlconf.name))
+                urlpatterns.append(url(urlconf.url,func,name=urlconf.name))
                 continue
 
             name = getattr(func,'__name__',None)
@@ -105,10 +105,10 @@ class RouteInspector(object):
                 continue
 
             name = self.normalize(name)
-            urlpatterns.append(url(r'^{}/'.format(name),func,urlconf.name))
+            urlpatterns.append(url(r'^{}/'.format(name),func,name=urlconf.name))
             # index function will bind an extra route.
             if name == 'index':
-                urlpatterns.append(url(r'/',func,urlconf.name))
+                urlpatterns.append(url(r'/',func,name=urlconf.name))
 
         return True,[
             url(r'^' + base, include(urlpatterns))
