@@ -73,7 +73,7 @@ class RouteInspector(object):
             # so that the exception here will be ignored silently(404),
             # rather than affect the global system.
             return True, []
-        base = '/'.join(route[truncate:-1])
+        base = '/'.join(route[truncate:])
         base = base + '/' if base else ''
         view_name = route[-1]
 
@@ -96,19 +96,20 @@ class RouteInspector(object):
                 continue
             # If url is specified, resolve directly.
             if urlconf.url:
-                urlpatterns.append(urlconf.url,func,urlconf.name)
+                urlpatterns.append(url(urlconf.url,func,urlconf.name))
                 continue
 
             name = getattr(func,'__name__',None)
             # Ignore the lambda expression and the function without `__name__`.
-            if not name or name != '<lambda>':
+            if not name or name == '<lambda>':
                 continue
 
             name = self.normalize(name)
-            urlpatterns.append(url(r'^{}/'.format(name),func))
+            urlpatterns.append(url(r'^{}/'.format(name),func,urlconf.name))
             # index function will bind an extra route.
             if name == 'index':
-                urlpatterns.append(url(r'/',func))
+                urlpatterns.append(url(r'/',func,urlconf.name))
+
         return True,[
             url(r'^' + base, include(urlpatterns))
         ] if len(urlpatterns) else []
