@@ -3,14 +3,16 @@ import sys
 from os import path
 from django.conf import settings
 
-ROOT = path.dirname(path.abspath(__file__))
+ROOT = path.join(
+    path.dirname(path.abspath(__file__)),
+    'test_django_proj'
+)
 sys.path.append(ROOT)
 
 SETTINGS = dict(
     DEBUG=True,
     BASE_DIR=ROOT,
-    TEMPLATE_DEBUG=True,
-    ROOT_URLCONF='urls',
+    ROOT_URLCONF='app.urls',
     INSTALLED_APPS=(
         'django.contrib.auth',
         'django.contrib.contenttypes',
@@ -29,4 +31,5 @@ if not settings.configured:
     settings.configure(**SETTINGS)
 
 if __name__ == '__main__':
-    pass
+    from django.core.management import execute_from_command_line
+    execute_from_command_line(["", "test"])
