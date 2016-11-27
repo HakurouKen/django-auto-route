@@ -96,7 +96,10 @@ class RouteInspector(object):
                 continue
             # If url is specified, resolve directly.
             if urlconf.url:
-                urlpatterns.append(url(urlconf.url,func,name=urlconf.name))
+                urlpatterns.append(url(
+                    re.sub(r'^/+',r'',urlconf.url),
+                    func,
+                    name=urlconf.name))
                 continue
 
             name = getattr(func,'__name__',None)
