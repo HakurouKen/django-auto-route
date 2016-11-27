@@ -12,7 +12,7 @@ sys.path.append(ROOT)
 SETTINGS = dict(
     DEBUG=True,
     BASE_DIR=ROOT,
-    ROOT_URLCONF='app.urls',
+    ROOT_URLCONF='default_urls',
     INSTALLED_APPS=(
         'django.contrib.auth',
         'django.contrib.contenttypes',
