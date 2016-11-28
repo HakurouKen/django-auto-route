@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from distutils.core import setup
+from setuptools import setup
 import os
 import autoroute
 
@@ -11,6 +11,7 @@ setup(
     author_email = 'ticshot@gmail.com',
     url = 'https://github.com/HakurouKen/django-auto-route/',
     py_modules = ['autoroute'],
+    packages = ['autoroute'],
     install_requires = [
         "django>=1.6"
     ],
