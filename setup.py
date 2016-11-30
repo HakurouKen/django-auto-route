@@ -7,6 +7,7 @@ setup(
     name = 'django-auto-route',
     version = autoroute.__version__,
     description = autoroute.__doc__,
+    long_description = open('README.rst'),
     author = autoroute.__author__,
     author_email = 'ticshot@gmail.com',
     url = 'https://github.com/HakurouKen/django-auto-route/',
