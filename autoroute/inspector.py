@@ -34,6 +34,7 @@ def is_python_package(filename):
 class RouteInspector(object):
     STYLES = ('dash','underscore','camel',)
 
+    # @TODO: Allow user to add a transformer.
     def __init__(self,root=None,style='dash'):
         root = root or getattr(settings,'BASE_DIR',None)
         if not root:
