@@ -58,3 +58,21 @@ class UnderscoreTestCase(SimpleTestCase):
         resolver = resolve('/app/views/custom/')
         self.assertEqual(resolver.func,views.custom_route)
         self.assertEqual(resolver.url_name,'custom-name')
+
+@override_settings(ROOT_URLCONF='transformed_urls')
+class TransformTestCase(SimpleTestCase):
+    ''' Test cases for autoroute with default params. '''
+
+    def test_auto_generated(self):
+        resolver = resolve('/app/auto-generated/')
+        self.assertEqual(resolver.func,views.auto_generated)
+
+    def test_with_name(self):
+        resolver = resolve('/app/with-name/')
+        self.assertEqual(resolver.func,views.with_name)
+        self.assertEqual(resolver.url_name,'with-name')
+
+    def test_custom(self):
+        resolver = resolve('/app/custom/')
+        self.assertEqual(resolver.func,views.custom_route)
+        self.assertEqual(resolver.url_name,'custom-name')

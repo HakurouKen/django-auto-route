@@ -34,8 +34,7 @@ def is_python_package(filename):
 class RouteInspector(object):
     STYLES = ('dash','underscore','camel',)
 
-    # @TODO: Allow user to add a transformer.
-    def __init__(self,root=None,style='dash'):
+    def __init__(self,root=None,style='dash',transformer=None):
         root = root or getattr(settings,'BASE_DIR',None)
         if not root:
             raise ParamsError('BASE_DIR is undefined.')
@@ -43,6 +42,10 @@ class RouteInspector(object):
             raise ParamsError('Invalid style. Must chosen from %s' % self.STYLES)
         self.root = root
         self.style = style
+        transformer = transformer or (lambda x : x)
+        if not callable(transformer):
+            raise ParamsError('Params transformer must be a callable object.')
+        self.transformer = transformer
 
     def normalize(self,name):
         '''
@@ -59,6 +62,11 @@ class RouteInspector(object):
             return components[0] + "".join(x.title() for x in components[1:])
         else:
             return None
+
+    def makeurl(self,base,regex,view,name):
+        regex = base + (regex or '/')
+        regex = self.transformer(regex.replace('//','/'))
+        return url(regex,view,name=name)
 
     def viewloader(self,view,truncate=0):
         '''
@@ -93,14 +101,11 @@ class RouteInspector(object):
         for func in funcs:
             # Only support view function here.
             urlconf = getattr(func,'_auto_urlconf',None)
-            if not callable(func) or not isinstance(urlconf,UrlConf):
+            if not callable(func) or not isinstance(urlconf, UrlConf):
                 continue
             # If url is specified, resolve directly.
             if urlconf.url:
-                urlpatterns.append(url(
-                    re.sub(r'^/+',r'',urlconf.url),
-                    func,
-                    name=urlconf.name))
+                urlpatterns.append(self.makeurl(base, urlconf.url, func, urlconf.name))
                 continue
 
             name = getattr(func,'__name__',None)
@@ -109,14 +114,14 @@ class RouteInspector(object):
                 continue
 
             name = self.normalize(name)
-            urlpatterns.append(url(r'^{}/'.format(name),func,name=urlconf.name))
+            urlpatterns.append(
+                self.makeurl(base, r'{}/'.format(name), func, urlconf.name)
+            )
             # index function will bind an extra route.
             if name == 'index':
-                urlpatterns.append(url(r'/',func,name=urlconf.name))
+                urlpatterns.append(self.makeurl(base, '/', func, urlconf.name))
 
-        return True,[
-            url(r'^' + base, include(urlpatterns))
-        ] if len(urlpatterns) else []
+        return True, urlpatterns
 
     def viewsloader(self,views=None,truncate=0):
         ''' A batch operation of view loader, return compiled urlpatterns. '''
